@@ -8,7 +8,8 @@ import Kafka.Client.Consumer
 import System.IO
 import Network.Socket
 import Data.IP
-
+import Control.Concurrent ( threadDelay )
+import Control.Monad
 
 main = do 
   -----------------
@@ -28,5 +29,11 @@ main = do
   putStrLn "TopicName eingeben"
   topicName <- getLine
   
+
+  forever $ do
+    --let req = ...
+    --sendRequest sock req
+    print "consume"
+    threadDelay 1000000
   print "OK"
 
