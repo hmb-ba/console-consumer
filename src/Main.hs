@@ -10,6 +10,7 @@ import Network.Socket
 import Data.IP
 import Control.Concurrent ( threadDelay )
 import Control.Monad
+import qualified Data.ByteString.Char8 as C
 
 main = do 
   -----------------
@@ -28,11 +29,9 @@ main = do
   clientId <- getLine
   putStrLn "TopicName eingeben"
   topicName <- getLine
-  
-
+  let req = packFtRequestMessage $ InputFt (C.pack clientId) (C.pack topicName) 
   forever $ do
-    --let req = ...
-    --sendRequest sock req
+    sendFtRequest sock req
     print "consume"
     threadDelay 1000000
   print "OK"
