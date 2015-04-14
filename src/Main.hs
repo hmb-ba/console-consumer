@@ -10,7 +10,9 @@ import Network.Socket
 import Data.IP
 import Control.Concurrent ( threadDelay )
 import Control.Monad
+import qualified Data.ByteString.Char8 as C
 
+import Kafka.Protocol
 main = do 
   -----------------
   -- Init Socket with user input
@@ -28,11 +30,18 @@ main = do
   clientId <- getLine
   putStrLn "TopicName eingeben"
   topicName <- getLine
-  
 
   forever $ do
-    --let req = ...
-    --sendRequest sock req
+    let req = packFtRqMessage $ InputFt (C.pack clientId) (C.pack topicName)
+    print req
+
+    -- testing
+    let msg = buildFtRqMessage req
+    print msg
+    parsed <- readRequest msg
+    print parsed
+
+    sendFtRequest sock req
     print "consume"
     threadDelay 1000000
   print "OK"
