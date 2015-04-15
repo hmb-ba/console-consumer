@@ -11,8 +11,9 @@ import Data.IP
 import Control.Concurrent ( threadDelay )
 import Control.Monad
 import qualified Data.ByteString.Char8 as C
+import qualified Network.Socket.ByteString.Lazy as SBL
+import Control.Concurrent
 
-import Kafka.Protocol
 main = do 
   -----------------
   -- Init Socket with user input
@@ -33,15 +34,11 @@ main = do
 
   forever $ do
     let req = packFtRqMessage $ InputFt (C.pack clientId) (C.pack topicName)
-    print req
-
-    -- testing
-    let msg = buildFtRqMessage req
-    print msg
-    parsed <- readRequest msg
-    print parsed
-
     sendFtRequest sock req
+    forkIO $ do
+      input <- SBL.recv sock 4096
+      let response = readFtResponse input
+      print response
     print "consume"
     threadDelay 1000000
   print "OK"
