@@ -12,6 +12,8 @@ import Control.Concurrent ( threadDelay )
 import Control.Monad
 import qualified Data.ByteString.Char8 as C
 import qualified Network.Socket.ByteString.Lazy as SBL
+import qualified Data.ByteString as BS
+
 import Control.Concurrent
 
 main = do 
@@ -31,12 +33,18 @@ main = do
   clientId <- getLine
   putStrLn "TopicName eingeben"
   topicName <- getLine
+  putStrLn "Ab Offset"
+  fetchOffset <- getLine 
 
   forever $ do
-    let req = packFtRqMessage $ InputFt (C.pack clientId) (C.pack topicName)
+    let req = packFtRqMessage $ InputFt
+                                  (C.pack clientId) 
+                                  (C.pack topicName)
+                                  (fromIntegral $ (read fetchOffset ::Int))
     sendFtRequest sock req
     forkIO $ do
       input <- SBL.recv sock 4096
+      print input
       let response = readFtResponse input
       print response
     print "consume"
