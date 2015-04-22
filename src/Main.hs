@@ -12,6 +12,8 @@ import Control.Concurrent ( threadDelay )
 import Control.Monad
 import qualified Data.ByteString.Char8 as C
 import qualified Network.Socket.ByteString.Lazy as SBL
+import qualified Data.ByteString as BS
+
 import Control.Concurrent
 
 main = do 
@@ -27,15 +29,16 @@ main = do
   portInput <- getLine
   --let port = read portInput ::PortNumber  -- PortNumber does not derive from read
   --connect sock (SockAddrInet 4343 ip)
-  connect sock (SockAddrInet 9092 ip)
+  connect sock (SockAddrInet 4343 ip)
   putStrLn "ClientId eingeben"
   clientId <- getLine
   putStrLn "TopicName eingeben"
   topicName <- getLine
+  putStrLn "Ab Offset"
+  fetchOffset <- getLine 
 
   forever $ do
-    let req = encodeRequest 1 0 0 (C.pack clientId) (C.pack topicName)
-    sendFtRequest sock req
+    sendFtRequest sock $ encodeRequest (1, 0, 0, clientId, topicName, (read fetchOffset ::Int))
     forkIO $ do
       input <- SBL.recv sock 4096
       print input
