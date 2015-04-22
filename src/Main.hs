@@ -3,7 +3,7 @@ module Main (
 )
 where 
 
-import Kafka.Client.Consumer 
+import Kafka.Client
 
 import System.IO
 import Network.Socket
@@ -38,11 +38,11 @@ main = do
   fetchOffset <- getLine 
 
   forever $ do
-    sendFtRequest sock $ encodeRequest (1, 0, 0, clientId, topicName, (read fetchOffset ::Int))
+    sendRequest sock $ encodeRequest (1, 0, 0, clientId, topicName, (read fetchOffset ::Int))
     forkIO $ do
       input <- SBL.recv sock 4096
       print input
-      let response = readFtResponse input
+      let response = decodeFtResponse input
       print response
     print "consume"
     threadDelay 1000000
