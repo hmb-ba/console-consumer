@@ -21,7 +21,7 @@ executable console-consumer
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.6 && <4.7,
-    binary >=0.6 && <0.8,
+    --binary >=0.6 && <0.8,
     bytestring >=0.10 && <0.11,
     network -any,
     iproute >= 1.3,
