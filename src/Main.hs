@@ -3,7 +3,7 @@ module Main (
 )
 where 
 
-import Kafka.Client.Consumer 
+import Kafka.Client
 
 import System.IO
 import Network.Socket
@@ -28,6 +28,7 @@ main = do
   putStrLn "Port eingeben"
   portInput <- getLine
   --let port = read portInput ::PortNumber  -- PortNumber does not derive from read
+  --connect sock (SockAddrInet 4343 ip)
   connect sock (SockAddrInet 4343 ip)
   putStrLn "ClientId eingeben"
   clientId <- getLine
@@ -37,14 +38,11 @@ main = do
   fetchOffset <- getLine 
 
   forever $ do
-    let req = packFtRqMessage $ InputFt
-                                  (C.pack clientId) 
-                                  (C.pack topicName)
-                                  (fromIntegral $ (read fetchOffset ::Int))
-    sendFtRequest sock req
+    sendRequest sock $ encodeRequest (1, 0, 0, clientId, topicName, (read fetchOffset ::Int))
     forkIO $ do
       input <- SBL.recv sock 4096
-      let response = readFtResponse input
+      print input
+      let response = decodeFtResponse input
       print response
     threadDelay 1000000
   print "OK"
