@@ -44,10 +44,8 @@ main = do
     sendFtRequest sock req
     forkIO $ do
       input <- SBL.recv sock 4096
-      print input
       let response = readFtResponse input
       print response
-    print "consume"
     threadDelay 1000000
   print "OK"
 
