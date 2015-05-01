@@ -25,6 +25,6 @@ executable console-consumer
     bytestring >=0.10 && <0.11,
     network -any,
     iproute >= 1.3,
-    kafka-protocol -any
+    kafka-protocol >= 0.1.0.0
   hs-source-dirs:      src
   default-language:  Haskell2010

@@ -25,6 +25,7 @@ main = do
   putStrLn "IP eingeben"
   ipInput <- getLine
   let ip = toHostAddress (read ipInput :: IPv4)
+  
   putStrLn "Port eingeben"
   portInput <- getLine
   --let port = read portInput ::PortNumber  -- PortNumber does not derive from read
@@ -32,13 +33,18 @@ main = do
   connect sock (SockAddrInet 4343 ip)
   putStrLn "ClientId eingeben"
   clientId <- getLine
+
   putStrLn "TopicName eingeben"
   topicName <- getLine
-  putStrLn "Ab Offset"
+
+  putStrLn "Give Partition Number"
+  partition <- getLine
+  
+  putStrLn "Give Offset"
   fetchOffset <- getLine 
 
   forever $ do
-    sendRequest sock $ encodeRequest (1, 0, 0, clientId, topicName, (read fetchOffset ::Int))
+    sendRequest sock $ encodeFtRequest (1, 0, 0, clientId, topicName,(read partition ::Int), (read fetchOffset ::Int))
     forkIO $ do
       input <- SBL.recv sock 4096
       print input
