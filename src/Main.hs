@@ -16,7 +16,7 @@ import qualified Data.ByteString as BS
 
 import Control.Concurrent
 
-main = do 
+main = do
   -----------------
   -- Init Socket with user input
   -----------------
@@ -25,26 +25,46 @@ main = do
   putStrLn "IP eingeben"
   ipInput <- getLine
   let ip = toHostAddress (read ipInput :: IPv4)
-  
+
   putStrLn "Port eingeben"
   portInput <- getLine
   --let port = read portInput ::PortNumber  -- PortNumber does not derive from read
   --connect sock (SockAddrInet 4343 ip)
   connect sock (SockAddrInet 4343 ip)
   putStrLn "ClientId eingeben"
-  clientId <- getLine
+  client <- getLine
 
-  putStrLn "TopicName eingeben"
+  let requestHeader = Head 0 0 (stringToClientId client)
+
+  -------------------
+  -- Get Metadata from known broker
+  ------------------
+  let mdReq = Metadata requestHeader [] -- request Metadata for all topics
+  sendRequest sock $ (pack mdReq)
+  mdInput <- SBL.recv sock 4096
+  let mdRes = decodeMdResponse mdInput
+  print "Brokers Metadata:"
+  print  mdRes
+
+  ---------------
+  -- Start Consuming
+  --------------
+  putStrLn "Give Topic Name"
   topicName <- getLine
+  let t = stringToTopic topicName
 
   putStrLn "Give Partition Number"
   partition <- getLine
-  
-  putStrLn "Give Offset"
-  fetchOffset <- getLine 
+  let p = read partition :: Int
 
+  putStrLn "Give Offset"
+  fetchOffset <- getLine
+  let o = read fetchOffset :: Int 
+
+  let ftReq = Fetch requestHeader [ FromTopic t [ FromPart p o ]]
   forever $ do
-    sendRequest sock $ encodeFtRequest (1, 0, 0, clientId, topicName,(read partition ::Int), (read fetchOffset ::Int))
+
+    sendRequest sock $ pack ftReq
     forkIO $ do
       input <- SBL.recv sock 4096
       print input
