@@ -3,18 +3,19 @@ module Main (
 )
 where 
 
-import Kafka.Client
-
-import System.IO
-import Network.Socket
-import Data.IP
-import Control.Concurrent ( threadDelay )
+import Control.Concurrent
 import Control.Monad
+
+import Data.IP
 import qualified Data.ByteString.Char8 as C
-import qualified Network.Socket.ByteString.Lazy as SBL
 import qualified Data.ByteString as BS
 
-import Control.Concurrent
+import Kafka.Client
+
+import Network.Socket
+import qualified Network.Socket.ByteString.Lazy as SBL
+
+import System.IO
 
 main = do
   -----------------
@@ -22,14 +23,12 @@ main = do
   -----------------
   sock <- socket AF_INET Stream defaultProtocol 
   setSocketOption sock ReuseAddr 1
-  putStrLn "IP eingeben"
+  putStrLn "Give IP"
   ipInput <- getLine
   let ip = toHostAddress (read ipInput :: IPv4)
 
-  putStrLn "Port eingeben"
+  putStrLn "Give Port"
   portInput <- getLine
-  --let port = read portInput ::PortNumber  -- PortNumber does not derive from read
-  --connect sock (SockAddrInet 4343 ip)
   connect sock (SockAddrInet 4343 ip)
   putStrLn "ClientId eingeben"
   client <- getLine
@@ -37,10 +36,10 @@ main = do
   let requestHeader = Head 0 0 (stringToClientId client)
 
   -------------------
-  -- Get Metadata from known broker
+  -- Get Metadata from broker
   ------------------
-  let mdReq = Metadata requestHeader [] -- request Metadata for all topics
-  sendRequest sock $ (pack mdReq)
+  let mdReq = Metadata requestHeader []
+  sendRequest sock mdReq
   mdInput <- SBL.recv sock 4096
   let mdRes = decodeMdResponse mdInput
   print "Brokers Metadata:"
@@ -64,7 +63,7 @@ main = do
   let ftReq = Fetch requestHeader [ FromTopic t [ FromPart p o ]]
   forever $ do
 
-    sendRequest sock $ pack ftReq
+    sendRequest sock $ ftReq
     forkIO $ do
       input <- SBL.recv sock 4096
       print input
